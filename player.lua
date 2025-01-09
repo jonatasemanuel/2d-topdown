@@ -2,12 +2,7 @@ require("world")
 
 Player = {}
 
-function Player:load(world)
-	-- self.world:setCallbacks(beginContact, endContact)
-	self.attackTimer = 0
-	self.attackDuration = 0.2
-	self.isAttacking = false
-end
+function Player:load() end
 
 function Player:new(world)
 	local self = self or {}
@@ -17,8 +12,10 @@ function Player:new(world)
 	self.height = 32
 	self.speed = 500
 	self.isColliding = nil
-	-- self.jumpCount = 0
-	-- self.isGrounded = false
+
+	self.attackRange = 50
+	self.damage = 30
+	self.isAttacking = false
 
 	self.world = world
 
@@ -41,18 +38,23 @@ function Player:new(world)
 end
 
 function Player:meleeAttack()
-	self.isAttacking = true
+	local px, py = self.physics.body:getPosition()
 
-	self.attackTimer = self.attackDuration
-end
-
-function Player:updateAttack(dt)
-	if self.isAttacking then
-		self.attackTimer = self.attackTimer - dt
-		if self.attackTimer <= 0 then
-			self.isAttacking = false
-		end
+	if self.isColliding then
+		World:destroyDestructible(self.isColliding)
+		self.isColliding = nil
+		return
 	end
+
+	--[[ for _, obj in ipairs(World.destructibles) do
+		local ox, oy = obj.body:getPosition()
+		local distance = math.sqrt((px - ox) ^ 2 + (py - oy) ^ 2)
+
+		if distance <= self.attackRange then
+			World.destroyDestructible(obj.fixture)
+			break
+		end
+	end ]]
 end
 
 function Player:update(dt)
@@ -62,15 +64,9 @@ end
 function Player:move(dt)
 	local vx, vy = 0, 0
 
-	-- if love.keyboard.isDown("space") then
-	-- 	self:meleeAttack()
-	-- else
-	-- 	self.isAttacking = false
-	-- end
 	function love.keypressed(key)
-		if key == "space" and self.isColliding then
-			World:destroyDestructible(self.isColliding)
-			self.isColliding = nil
+		if key == "space" then
+			Player:meleeAttack()
 		end
 	end
 
@@ -132,9 +128,11 @@ function Player:draw()
 	love.graphics.polygon("fill", self.physics.body:getWorldPoints(self.physics.shape:getPoints()))
 
 	-- range of melee atack
+	local px, py = self.physics.body:getPosition()
 	if self.isAttacking then
-		local px, py = self.physics.body:getPosition()
 		love.graphics.setColor(1, 0, 0, 0.5)
-		love.graphics.circle("line", px, py, 50)
+		love.graphics.circle("line", px, py, self.attackRange)
+		love.graphics.setColor(1, 1, 1)
+		self.isAttacking = false
 	end
 end
