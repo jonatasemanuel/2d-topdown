@@ -12,10 +12,10 @@ function World:load()
 	-- load objects rules
 	self.destructibleTypes = {
 		tree = { health = 100, loot = "wood" },
-		barrel = { health = 100, loot = "oil" },
+		barrel = { health = 10, loot = "oil" },
 		crate = { health = 15, loot = "supplies" },
-		iron = { health = 200, loot = "supplies" },
-		chest = { health = 100, loot = "big bound" },
+		iron = { health = 300, loot = "supplies" },
+		chest = { health = 100, loot = "big bount" },
 	}
 
 	-- Add walls
@@ -28,6 +28,7 @@ function World:load()
 	World:createDestructible(250, 200, 50, 50, "iron")
 	World:createDestructible(350, 300, 50, 50, "crate")
 	World:createDestructible(700, 200, 50, 50, "barrel")
+	World:createDestructible(500, 200, 50, 50, "barrel")
 	World:createDestructible(800, 100, 50, 50, "chest")
 end
 
@@ -72,9 +73,11 @@ function World:destroyDestructible(fixture)
 	for i, obj in ipairs(self.destructibles) do
 		if obj.fixture == fixture then
 			-- Destroy the physics body and remove from the table
+			local loot = self.destructibleTypes[obj.type].loot
+			Player:addToInventory(loot)
+			print("Loot: ", loot)
 			obj.body:destroy()
 			table.remove(self.destructibles, i)
-			print("Loot: ", self.destructibleTypes[obj.type].loot)
 			break
 		end
 	end

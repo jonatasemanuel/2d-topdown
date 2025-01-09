@@ -10,11 +10,17 @@ function Player:new(world)
 	self.y = love.graphics.getWidth() / 2
 	self.width = 16
 	self.height = 32
-	self.speed = 500
-	self.isColliding = nil
 
-	self.attackRange = 100
+	-- status
+	self.health = 100
+	self.maxHealth = 100
+	self.speed = 500
 	self.damage = 30
+
+	self.inventory = {}
+
+	self.isColliding = nil
+	self.attackRange = 75
 	self.isAttacking = false
 
 	self.world = world
@@ -35,6 +41,35 @@ function Player:new(world)
 	end
 
 	return self
+end
+
+function Player:takeDamage(amount)
+	self.health = self.health - amount
+	if self.health <= 0 then
+		print("u die fucking stupid")
+		-- reset game or respawn or game over idk
+	end
+end
+
+function Player:useItem(item)
+	if self.inventory[item] and self.inventory[item] > 0 then
+		if item == "supplies" then
+			self.health = math.min(self.maxHealth, self.health + 25)
+			print("25 hp")
+			print(self.health)
+		end
+		self.inventory[item] = self.inventory[item] - 1
+	else
+		print("you dont have any: " .. item .. "!")
+	end
+end
+
+function Player:addToInventory(item)
+	if not self.inventory[item] then
+		self.inventory[item] = 0
+	end
+	self.inventory[item] = self.inventory[item] + 1
+	print("collected: " .. item .. ". total: " .. self.inventory[item])
 end
 
 function Player:interact()
@@ -60,8 +95,9 @@ function Player:meleeAttack()
 		local distance = math.sqrt((px - ox) ^ 2 + (py - oy) ^ 2)
 
 		if distance <= self.attackRange then
-			if Player:interact() == true and obj.type == "chest" then
-				World:destroyDestructible(obj.fixture)
+			if obj.type == "barrel" then
+				Player:takeDamage(50)
+				print("live Remaining: ", self.health)
 			end
 			obj.health = obj.health - self.damage
 			print(obj.type .. " took " .. self.damage .. " damage! Remaining health: " .. obj.health)
@@ -86,6 +122,9 @@ function Player:move(dt)
 		end
 		if key == "e" then
 			Player:interact()
+		end
+		if key == "h" then
+			Player:useItem("supplies")
 		end
 	end
 
@@ -140,4 +179,11 @@ function Player:draw()
 	love.graphics.setColor(1, 0, 0, 0.5)
 	love.graphics.circle("line", px, py, self.attackRange)
 	love.graphics.setColor(1, 1, 1) ]]
+
+	local px, py = self.physics.body:getPosition()
+	love.graphics.setColor(1, 0, 0)
+	love.graphics.rectangle("fill", px - 25, py - 40, 50, 5)
+	love.graphics.setColor(0, 1, 0)
+	love.graphics.rectangle("fill", px - 25, py - 40, 50 * (self.health / self.maxHealth), 5)
+	love.graphics.setColor(1, 1, 1)
 end
