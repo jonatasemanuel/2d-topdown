@@ -38,6 +38,12 @@ function Player:new(world)
 
 	self.draw = function()
 		love.graphics.polygon("fill", self.physics.body:getWorldPoints(self.physics.shape:getPoints()))
+		local px, py = self.physics.body:getPosition()
+		love.graphics.setColor(1, 0, 0)
+		love.graphics.rectangle("fill", px - 25, py - 40, 50, 5)
+		love.graphics.setColor(0, 1, 0)
+		love.graphics.rectangle("fill", px - 25, py - 40, 50 * (self.health / self.maxHealth), 5)
+		love.graphics.setColor(1, 1, 1)
 	end
 
 	return self
@@ -179,11 +185,4 @@ function Player:draw()
 	love.graphics.setColor(1, 0, 0, 0.5)
 	love.graphics.circle("line", px, py, self.attackRange)
 	love.graphics.setColor(1, 1, 1) ]]
-
-	local px, py = self.physics.body:getPosition()
-	love.graphics.setColor(1, 0, 0)
-	love.graphics.rectangle("fill", px - 25, py - 40, 50, 5)
-	love.graphics.setColor(0, 1, 0)
-	love.graphics.rectangle("fill", px - 25, py - 40, 50 * (self.health / self.maxHealth), 5)
-	love.graphics.setColor(1, 1, 1)
 end

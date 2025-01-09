@@ -102,6 +102,8 @@ function World:draw()
 			love.graphics.setColor(1, 0, 1)
 		elseif obj.type == "iron" then
 			love.graphics.setColor(1, 0, 0)
+		elseif obj.type == "chest" then
+			love.graphics.setColor(0, 1, 1)
 		elseif obj.type == "crate" then
 			love.graphics.setColor(0.8, 0.5, 0.2)
 		end
