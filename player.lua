@@ -38,11 +38,39 @@ function Player:new(world)
 
 	self.draw = function()
 		love.graphics.polygon("fill", self.physics.body:getWorldPoints(self.physics.shape:getPoints()))
-		local px, py = self.physics.body:getPosition()
-		love.graphics.setColor(1, 0, 0)
-		love.graphics.rectangle("fill", px - 25, py - 40, 50, 5)
-		love.graphics.setColor(0, 1, 0)
-		love.graphics.rectangle("fill", px - 25, py - 40, 50 * (self.health / self.maxHealth), 5)
+		-- Health bar as blocks
+		-- Health bar as 5 blocks
+
+		local px, py = 70, 65
+		-- local px, py = self.physics.body:getPosition()
+		local blockWidth = 20
+		local blockHeight = 8
+		local blockSpacing = 4
+		local totalBlocks = 5 -- Fixed number of blocks
+		local healthPerBlock = self.maxHealth / totalBlocks -- Health represented by each block
+
+		-- Calculate active blocks based on current health
+		local activeBlocks = math.ceil(self.health / healthPerBlock)
+
+		-- Draw health blocks
+		love.graphics.setColor(0, 0, 1) -- Block color
+		for i = 1, totalBlocks do
+			local row = math.floor((i - 1) / totalBlocks)
+			local col = (i - 1) % totalBlocks
+
+			local blockX = px - (totalBlocks * (blockWidth + blockSpacing)) / 2 + (col * (blockWidth + blockSpacing))
+			local blockY = py - 50 + (row * (blockHeight + blockSpacing))
+
+			if i <= activeBlocks then
+				love.graphics.rectangle("fill", blockX, blockY, blockWidth, blockHeight) -- Active block
+			else
+				love.graphics.setColor(0.5, 0.5, 0.5) -- Inactive block (gray)
+				love.graphics.rectangle("line", blockX, blockY, blockWidth, blockHeight)
+				love.graphics.setColor(1, 0, 0) -- Reset color for active blocks
+			end
+		end
+
+		-- Reset color
 		love.graphics.setColor(1, 1, 1)
 	end
 
@@ -102,7 +130,7 @@ function Player:meleeAttack()
 
 		if distance <= self.attackRange then
 			if obj.type == "barrel" then
-				Player:takeDamage(50)
+				Player:takeDamage(45)
 				print("live Remaining: ", self.health)
 			end
 			obj.health = obj.health - self.damage
