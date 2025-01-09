@@ -14,7 +14,8 @@ function World:load()
 		tree = { health = 100, loot = "wood" },
 		barrel = { health = 100, loot = "oil" },
 		crate = { health = 15, loot = "supplies" },
-		-- iron = { health = 200, loot = "supplies" },
+		iron = { health = 200, loot = "supplies" },
+		chest = { health = 100, loot = "big bound" },
 	}
 
 	-- Add walls
@@ -27,6 +28,7 @@ function World:load()
 	World:createDestructible(250, 200, 50, 50, "iron")
 	World:createDestructible(350, 300, 50, 50, "crate")
 	World:createDestructible(700, 200, 50, 50, "barrel")
+	World:createDestructible(800, 100, 50, 50, "chest")
 end
 
 function World:addWall(x, y, width, height)
@@ -41,12 +43,19 @@ function World:addWall(x, y, width, height)
 end
 
 function World:createDestructible(x, y, width, height, type)
+	local destructibleData = self.destructibleTypes[type]
+	if not destructibleData then
+		print("Invalid destructible type: " .. tostring(type))
+		return nil
+	end
+
 	local obj = {}
 	obj.body = love.physics.newBody(self.world, x + width / 2, y + height / 2, "static")
 	obj.shape = love.physics.newRectangleShape(width, height)
 	obj.fixture = love.physics.newFixture(obj.body, obj.shape)
 	obj.type = type
-	obj.fixture:setUserData(obj) -- Store the destructible object in UserData
+	obj.health = destructibleData.health -- Assign health based on type
+	obj.fixture:setUserData(obj)
 
 	table.insert(self.destructibles, obj)
 	return obj
@@ -93,7 +102,14 @@ function World:draw()
 		elseif obj.type == "crate" then
 			love.graphics.setColor(0.8, 0.5, 0.2)
 		end
+
+		-- Draw the destructible object
 		love.graphics.polygon("fill", obj.body:getWorldPoints(obj.shape:getPoints()))
+
+		-- Draw health above the object
+		local x, y = obj.body:getPosition()
+		love.graphics.setColor(1, 1, 1)
+		love.graphics.print("HP: " .. obj.health, x - 15, y - 30)
 	end
 
 	-- Reset color

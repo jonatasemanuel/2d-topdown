@@ -13,7 +13,7 @@ function Player:new(world)
 	self.speed = 500
 	self.isColliding = nil
 
-	self.attackRange = 50
+	self.attackRange = 100
 	self.damage = 30
 	self.isAttacking = false
 
@@ -37,13 +37,39 @@ function Player:new(world)
 	return self
 end
 
+function Player:interact()
+	local px, py = self.physics.body:getPosition()
+
+	for _, obj in ipairs(World.destructibles) do
+		local ox, oy = obj.body:getPosition()
+		local distance = math.sqrt((px - ox) ^ 2 + (py - oy) ^ 2)
+
+		if distance <= self.attackRange then
+			if obj.type == "chest" then
+				World:destroyDestructible(obj.fixture)
+			end
+		end
+	end
+end
+
 function Player:meleeAttack()
 	local px, py = self.physics.body:getPosition()
 
-	if self.isColliding then
-		World:destroyDestructible(self.isColliding)
-		self.isColliding = nil
-		return
+	for _, obj in ipairs(World.destructibles) do
+		local ox, oy = obj.body:getPosition()
+		local distance = math.sqrt((px - ox) ^ 2 + (py - oy) ^ 2)
+
+		if distance <= self.attackRange then
+			if Player:interact() == true and obj.type == "chest" then
+				World:destroyDestructible(obj.fixture)
+			end
+			obj.health = obj.health - self.damage
+			print(obj.type .. " took " .. self.damage .. " damage! Remaining health: " .. obj.health)
+
+			if obj.health <= 0 then
+				World:destroyDestructible(obj.fixture)
+			end
+		end
 	end
 end
 
@@ -57,6 +83,9 @@ function Player:move(dt)
 	function love.keypressed(key)
 		if key == "space" then
 			Player:meleeAttack()
+		end
+		if key == "e" then
+			Player:interact()
 		end
 	end
 
