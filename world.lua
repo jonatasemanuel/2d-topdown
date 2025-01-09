@@ -57,17 +57,6 @@ function World:isDestructible(userData)
 		return self.destructibleTypes[userData.type] or false
 	end
 	return false
-	--[[ local destructibleTypes = { tree = true, barrel = false, crate = true }
-
-	if type(userData) == "string" then
-		return destructibleTypes[userData] ~= nil
-	end
-	if type(userData) == "table" and userData.type then
-		return destructibleTypes[userData.type] ~= nil
-	end
-
-	-- Not destructible
-	return false ]]
 end
 
 function World:destroyDestructible(fixture)
