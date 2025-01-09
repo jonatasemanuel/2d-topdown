@@ -30,9 +30,9 @@ function Player:new(world)
 
 	self.physics.fixture:setUserData("player")
 
-	-- self.draw = function()
-	-- 	love.graphics.rectangle("fill", self.physics.body:getX(), self.physics.body:getY(), self.width, self.height)
-	-- end
+	self.draw = function()
+		love.graphics.polygon("fill", self.physics.body:getWorldPoints(self.physics.shape:getPoints()))
+	end
 
 	return self
 end
@@ -45,16 +45,6 @@ function Player:meleeAttack()
 		self.isColliding = nil
 		return
 	end
-
-	--[[ for _, obj in ipairs(World.destructibles) do
-		local ox, oy = obj.body:getPosition()
-		local distance = math.sqrt((px - ox) ^ 2 + (py - oy) ^ 2)
-
-		if distance <= self.attackRange then
-			World.destroyDestructible(obj.fixture)
-			break
-		end
-	end ]]
 end
 
 function Player:update(dt)
@@ -92,30 +82,19 @@ function beginContact(a, b, coll)
 	local userDataA = a:getUserData()
 	local userDataB = b:getUserData()
 
-	-- Player.isColliding = true
-	print(Player.isColliding)
-
 	-- Debug collision
 	print("Collision Detected: A =", userDataA and userDataA.type, "B =", userDataB and userDataB.type)
 
-	-- Check if the player is attacking and colliding with a destructible object
-	-- if Player.isColliding or Player.isAttacking then
 	if a == Player.physics.fixture and World:isDestructible(userDataB) then
 		Player.isColliding = b
 	elseif b == Player.physics.fixture and World:isDestructible(userDataA) then
 		Player.isColliding = a
 	end
-	-- if destructible then
-	-- 	World:destroyDestructible(destructible)
-	-- end
 end
 
 function endContact(a, b, coll)
 	local userDataA = a:getUserData()
 	local userDataB = b:getUserData()
-
-	-- Player.isColliding = false
-	print(Player.isColliding)
 
 	print("end contat: A =", userDataA, "B =", userDataB)
 
@@ -125,14 +104,11 @@ function endContact(a, b, coll)
 end
 
 function Player:draw()
-	love.graphics.polygon("fill", self.physics.body:getWorldPoints(self.physics.shape:getPoints()))
+	-- love.graphics.polygon("fill", self.physics.body:getWorldPoints(self.physics.shape:getPoints()))
 
 	-- range of melee atack
-	local px, py = self.physics.body:getPosition()
-	if self.isAttacking then
-		love.graphics.setColor(1, 0, 0, 0.5)
-		love.graphics.circle("line", px, py, self.attackRange)
-		love.graphics.setColor(1, 1, 1)
-		self.isAttacking = false
-	end
+	--[[ local px, py = self.physics.body:getPosition()
+	love.graphics.setColor(1, 0, 0, 0.5)
+	love.graphics.circle("line", px, py, self.attackRange)
+	love.graphics.setColor(1, 1, 1) ]]
 end
